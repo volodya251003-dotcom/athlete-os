@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athlete OS v1.0 — Система управления телом</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js">
+    </script>
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --surface: #141418;
+            --surface2: #1a1a20;
+            --surface3: #1f1f26;
+            --border: #2a2a35;
+            --text: #e0e0e0;
+            --text2: #a0a0b0;
+            --accent: #f59e0b;
+            --accent2: #ff6b35;
+            --green: #22c55e;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s ease;
+            --sidebar-w: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            letter-spacing: -0.01em;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 10;
+            padding: 0 0 20px 0;
+        }
+        .sidebar-logo {
+            padding: 24px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 2;
+        }
+        .sidebar-logo h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .sidebar-logo .ver {
+            font-size: 0.7rem;
+            color: var(--text2);
+            letter-spacing: 0.05em;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 8px 0;
+        }
+        .sidebar-nav .nav-group {
+            padding: 8px 16px 4px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text2);
+            font-weight: 700;
+        }
+        .sidebar-nav button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text2);
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-align: left;
+            transition: var(--transition);
+            border-radius: 0;
+            letter-spacing: -0.01em;
+            font-family: inherit;
+        }
+        .sidebar-nav button:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+        .sidebar-nav button.active {
+            background: var(--surface3);
+            color: var(--accent);
+            font-weight: 600;
+            border-left: 3px solid var(--accent);
+            padding-left: 17px;
+        }
+        .sidebar-nav button .ico {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .sidebar-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            color: var(--text2);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .sidebar-footer button {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.78rem;
+            transition: var(--transition);
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .sidebar-footer button:hover {
+            background: var(--surface3);
+            border-color: var(--accent);
+        }
+        .sidebar-footer .btn-export {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            font-weight: 700;
+        }
+        .sidebar-footer .btn-export:hover {
+            background: var(--accent2);
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 36px;
+            scroll-behavior: smooth;
+        }
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+        .section .subtitle {
+            color: var(--text2);
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+        .card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+        }
+        .card-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .stat-box {
+            background: var(--surface2);
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            text-align: center;
+            min-width: 100px;
+            flex: 1;
+        }
+        .stat-box .val {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+        .stat-box .lbl {
+            font-size: 0.7rem;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+        .accent-val {
+            color: var(--accent);
+        }
+        .green-val {
+            color: var(--green);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        @media (max-width: 900px) {
+            .grid-2,
+            .grid-3,
+            .grid-4 {
+                grid-template-columns: 1fr 1fr;
+            }
+            .sidebar {
+                width: 200px;
+                min-width: 200px;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                min-width: 100%;
+                max-height: 200px;
+                flex-shrink: 0;
+            }
+            .main {
+                padding: 16px;
+            }
+            .grid-2,
+            .grid-3,
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Inputs */
+        input,
+        select,
+        textarea {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-family: inherit;
+            width: 100%;
+            transition: var(--transition);
+            letter-spacing: -0.01em;
+        }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.08);
+        }
+        label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text2);
+            display: block;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .input-inline {
+            display: flex;
+            gap: 8px;
+            align-items: end;
+        }
+        .input-inline .input-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: -0.01em;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-accent {
+            background: var(--accent);
+            color: #000;
+        }
+        .btn-accent:hover {
+            background: var(--accent2);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent);
+            background: var(--surface2);
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+        }
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            opacity: 0.85;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text2);
+            font-weight: 700;
+        }
+        tr:hover td {
+            background: var(--surface2);
+        }
+        .check-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .dot-green {
+            background: var(--green);
+        }
+        .dot-red {
+            background: var(--red);
+        }
+        .dot-yellow {
+            background: var(--accent);
+        }
+
+        /* Progress bar */
+        .progress-bar-wrap {
+            background: var(--surface3);
+            border-radius: 20px;
+            height: 8px;
+            overflow: hidden;
+            margin: 6px 0;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+        }
+
+        /* Athlete Index */
+        .index-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 8px solid var(--surface3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            margin: 0 auto;
+            position: relative;
+        }
+        .index-circle.high {
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .index-circle.mid {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .index-circle.low {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* Chart container */
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            max-height: 300px;
+        }
+        .chart-wrap canvas {
+            width: 100% !important;
+            max-height: 300px;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .tag-green {
+            background: #1a3a2a;
+            color: var(--green);
+        }
+        .tag-yellow {
+            background: #3a2e1a;
+            color: var(--accent);
+        }
+        .tag-red {
+            background: #3a1a1a;
+            color: var(--red);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            max-width: 520px;
+            width: 95%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .modal h3 {
+            margin-bottom: 16px;
+        }
+
+        /* Print */
+        @media print {
+            .sidebar,
+            .btn,
+            button,
+            .modal-overlay,
+            .sidebar-footer {
+                display: none !important;
+            }
+            .main {
+                padding: 0;
+                overflow: visible;
+            }
+            body {
+                background: #fff;
+                color: #000;
+                display: block;
+                height: auto;
+                overflow: visible;
+            }
+            .card {
+                border: 1px solid #ccc;
+                break-inside: avoid;
+                background: #fff;
+            }
+            .section {
+                display: block !important;
+                page-break-before: always;
+            }
+        }
+    </style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Athlete OS">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <h1>⚡ Athlete OS</h1>
+            <span class="ver">v1.0 · Система управления телом</span>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-group">Главное</div>
+            <button class="active" data-section="dashboard"><span class="ico">📊</span> Дашборд</button>
+            <button data-section="profile"><span class="ico">👤</span> Профиль</button>
+            <button data-section="goals"><span class="ico">🎯</span> Цели</button>
+            <button data-section="photos"><span class="ico">📸</span> Фото</button>
+            <div class="nav-group">Ежедневно</div>
+            <button data-section="nutrition"><span class="ico">🥗</span> Питание</button>
+            <button data-section="supplements"><span class="ico">💊</span> Добавки</button>
+            <button data-section="sleep"><span class="ico">😴</span> Сон</button>
+            <button data-section="cardio"><span class="ico">🚴</span> Кардио</button>
+            <button data-section="recovery"><span class="ico">🩺</span> Восстановление</button>
+            <button data-section="biomechanics"><span class="ico">🦴</span> Биомеханика</button>
+            <div class="nav-group">Тренинг</div>
+            <button data-section="training"><span class="ico">🏋️</span> Тренировки</button>
+            <button data-section="progress"><span class="ico">📈</span> График прогрессии</button>
+            <button data-section="records"><span class="ico">🏆</span> Личные рекорды</button>
+            <div class="nav-group">Планирование</div>
+            <button data-section="weekly-plan"><span class="ico">📅</span> План на неделю</button>
+            <button data-section="checklist"><span class="ico">✅</span> Чек-лист</button>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="btn-export" onclick="exportPDF()">📄 Экспорт PDF</button>
+            <button onclick="resetAllData()" style="color:var(--red);">🗑 Сброс</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main" id="mainContent">
+
+        <!-- Dashboard -->
+        <section class="section active" id="section-dashboard">
+            <h2>📊 Дашборд</h2>
+            <p class="subtitle">Общая картина твоего прогресса</p>
+            <div class="grid-4" id="dashStats"></div>
+            <div class="card" style="margin-top:16px;">
+                <h3>⚡ Индекс атлета</h3>
+                <div id="athleteIndexDisplay" style="text-align:center;"></div>
+                <p style="text-align:center;color:var(--text2);font-size:0.75rem;margin-top:8px;">
+                    25% тренировки · 20% питание · 15% сила · 15% восстановление · 15% кардио · 10% стабильность
+                </p>
+            </div>
+            <div class="card">
+                <h3>📉 График веса</h3>
+                <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>📋 Следующая тренировка</h3>
+                <p id="nextWorkout" style="font-size:1.2rem;font-weight:700;"></p>
+                <p style="color:var(--text2);" id="weeklyProgressSummary"></p>
+            </div>
+        </section>
+
+        <!-- Profile -->
+        <section class="section" id="section-profile">
+            <h2>👤 Профиль</h2>
+            <p class="subtitle">Твои данные и замеры</p>
+            <div class="card">
+                <div class="grid-3">
+                    <div class="input-group"><label>Рост (см)</label><input type="number" id="profHeight" placeholder="180"></div>
+                    <div class="input-group"><label>Вес (кг)</label><input type="number" id="profWeight" step="0.1" placeholder="100.2"></div>
+                    <div class="input-group"><label>Возраст</label><input type="number" id="profAge" placeholder="30"></div>
+                </div>
+                <div class="input-group"><label>Фото (URL или base64)</label><input type="text" id="profPhoto" placeholder="Ссылка на фото"></div>
+            </div>
+            <div class="card">
+                <h3>Обхваты (см)</h3>
+                <div class="grid-3">
+                    <div class="input-group"><label>Талия</label><input type="number" id="measWaist" step="0.1"></div>
+                    <div class="input-group"><label>Грудь</label><input type="number" id="measChest" step="0.1"></div>
+                    <div class="input-group"><label>Бицепс</label><input type="number" id="measBiceps" step="0.1"></div>
+                    <div class="input-group"><label>Предплечье</label><input type="number" id="measForearm" step="0.1"></div>
+                    <div class="input-group"><label>Бедро</label><input type="number" id="measThigh" step="0.1"></div>
+                    <div class="input-group"><label>Икры</label><input type="number" id="measCalves" step="0.1"></div>
+                    <div class="input-group"><label>Шея</label><input type="number" id="measNeck" step="0.1"></div>
+                </div>
+                <button class="btn btn-accent" style="margin-top:12px;" onclick="saveProfile()">💾 Сохранить профиль</button>
+                <button class="btn btn-outline" style="margin-top:12px;margin-left:8px;" onclick="saveMeasurements()">📏 Записать замеры</button>
+            </div>
+            <div class="card">
+                <h3>📜 История замеров</h3>
+                <div id="measurementHistory" style="max-height:300px;overflow-y:auto;"></div>
+            </div>
+        </section>
+
+        <!-- Goals -->
+        <section class="section" id="section-goals">
+            <h2>🎯 Цели</h2>
+            <p class="subtitle">Куда мы движемся</p>
+            <div id="goalsList"></div>
+            <div class="card">
+                <h3>Добавить цель</h3>
+                <div class="input-inline">
+                    <div class="input-group"><label>Название</label><input type="text" id="goalName" placeholder="Жим лёжа"></div>
+                    <div class="input-group"><label>Старт</label><input type="text" id="goalStart" placeholder="100×5"></div>
+                    <div class="input-group"><label>Цель</label><input type="text" id="goalTarget" placeholder="120×5"></div>
+                    <div class="input-group"><label>Текущее</label><input type="text" id="goalCurrent" placeholder="105×5"></div>
+                    <button class="btn btn-accent btn-sm" onclick="addGoal()">+</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Photos -->
+        <section class="section" id="section-photos">
+            <h2>📸 Фото</h2>
+            <p class="subtitle">Календарь фотографий по неделям</p>
+            <div class="card">
+                <div class="input-inline">
+                    <div class="input-group"><label>Номер недели</label><input type="number" id="photoWeek" placeholder="1"></div>
+                    <div class="input-group"><label>Ракурс</label><select id="photoAngle"><option>Спереди</option><option>Сбоку</option><option>Сзади</option></select></div>
+                    <div class="input-group"><label>URL фото</label><input type="text" id="photoURL" placeholder="Ссылка или base64"></div>
+                    <button class="btn btn-accent btn-sm" onclick="addPhoto()">📷 Добавить</button>
+                </div>
+            </div>
+            <div id="photosGallery" class="grid-3"></div>
+        </section>
+
+        <!-- Nutrition -->
+        <section class="section" id="section-nutrition">
+            <h2>🥗 Питание</h2>
+            <p class="subtitle">Ежедневный учёт</p>
+            <div class="card">
+                <div class="grid-3">
+                    <div class="input-group"><label>Дата</label><input type="date" id="nutDate"></div>
+                    <div class="input-group"><label>Белки (г)</label><input type="number" id="nutProtein" step="0.1"></div>
+                    <div class="input-group"><label>Жиры (г)</label><input type="number" id="nutFat" step="0.1"></div>
+                    <div class="input-group"><label>Углеводы (г)</label><input type="number" id="nutCarbs" step="0.1"></div>
+                    <div class="input-group"><label>Ккал</label><input type="number" id="nutKcal"></div>
+                    <div class="input-group"><label>Вода (л)</label><input type="number" id="nutWater" step="0.1"></div>
+                    <div class="input-group"><label>Клетчатка (г)</label><input type="number" id="nutFiber" step="0.1"></div>
+                    <div class="input-group"><label>Соль (г)</label><input type="number" id="nutSalt" step="0.1"></div>
+                    <div class="input-group"><label>Настроение (1-10)</label><input type="number" id="nutMood" min="1" max="10"></div>
+                    <div class="input-group"><label>Голод (1-10)</label><input type="number" id="nutHunger" min="1" max="10"></div>
+                </div>
+                <button class="btn btn-accent" style="margin-top:12px;" onclick="addNutrition()">💾 Записать день</button>
+            </div>
+            <div class="card">
+                <h3>📊 Среднее за последнюю неделю</h3>
+                <div id="nutritionAvg" class="grid-4"></div>
+            </div>
+            <div class="card">
+                <h3>📋 История</h3>
+                <div id="nutritionHistory" style="max-height:300px;overflow-y:auto;"></div>
+            </div>
+        </section>
+
+        <!-- Supplements -->
+        <section class="section" id="section-supplements">
+            <h2>💊 Добавки</h2>
+            <p class="subtitle">Ежедневный чек-лист</p>
+            <div id="supplementsList"></div>
+            <div class="card">
+                <div class="input-inline">
+                    <div class="input-group"><label>Добавка</label><input type="text" id="suppName" placeholder="Креатин"></div>
+                    <div class="input-group"><label>Доза</label><input type="text" id="suppDose" placeholder="5 г"></div>
+                    <button class="btn btn-accent btn-sm" onclick="addSupplement()">+</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sleep -->
+        <section class="section" id="section-sleep">
+            <h2>😴 Сон</h2>
+            <p class="subtitle">Качество восстановления</p>
+            <div class="card">
+                <div class="grid-3">
+                    <div class="input-group"><label>Дата</label><input type="date" id="sleepDate"></div>
+                    <div class="input-group"><label>Лёг</label><input type="time" id="sleepBed"></div>
+                    <div class="input-group"><label>Проснулся</label><input type="time" id="sleepWake"></div>
+                    <div class="input-group"><label>Часы сна</label><input type="number" id="sleepHours" step="0.1"></div>
+                    <div class="input-group"><label>Качество (1-10)</label><input type="number" id="sleepQuality" min="1" max="10"></div>
+                    <div class="input-group"><label>Пробуждения</label><input type="number" id="sleepAwakenings"></div>
+                </div>
+                <button class="btn btn-accent" style="margin-top:12px;" onclick="addSleep()">💾 Записать</button>
+            </div>
+            <div class="card"><h3>📋 История сна</h3><div id="sleepHistory" style="max-height:300px;overflow-y:auto;"></div></div>
+        </section>
+
+        <!-- Cardio -->
+        <section class="section" id="section-cardio">
+            <h2>🚴 Кардио</h2>
+            <p class="subtitle">Активность</p>
+            <div class="card">
+                <div class="grid-3">
+                    <div class="input-group"><label>Дата</label><input type="date" id="cardioDate"></div>
+                    <div class="input-group"><label>Велосипед (км)</label><input type="number" id="cardioBikeKm" step="0.1"></div>
+                    <div class="input-group"><label>Велосипед (мин)</label><input type="number" id="cardioBikeMin"></div>
+                    <div class="input-group"><label>Бассейн (мин)</label><input type="number" id="cardioPoolMin"></div>
+                    <div class="input-group"><label>Шаги</label><input type="number" id="cardioSteps"></div>
+                    <div class="input-group"><label>Пульс (средний)</label><input type="number" id="cardioHR"></div>
+                </div>
+                <button class="btn btn-accent" style="margin-top:12px;" onclick="addCardio()">💾 Записать</button>
+            </div>
+            <div class="card"><h3>📋 История</h3><div id="cardioHistory" style="max-height:300px;overflow-y:auto;"></div></div>
+        </section>
+
+        <!-- Recovery -->
+        <section class="section" id="section-recovery">
+            <h2>🩺 Анализ восстановления</h2>
+            <p class="subtitle">Ежедневная оценка</p>
+            <div class="card">
+                <div class="grid-3">
+                    <div class="input-group"><label>Дата</label><input type="date" id="recDate"></div>
+                    <div class="input-group"><label>Энергия (1-10)</label><input type="number" id="recEnergy" min="1" max="10"></div>
+                    <div class="input-group"><label>Мотивация (1-10)</label><input type="number" id="recMotivation" min="1" max="10"></div>
+                    <div class="input-group"><label>Стресс (1-10)</label><input type="number" id="recStress" min="1" max="10"></div>
+                    <div class="input-group"><label>Аппетит (1-10)</label><input type="number" id="recAppetite" min="1" max="10"></div>
+                </div>
+                <p style="font-weight:700;margin-top:8px;">Боль:</p>
+                <div class="grid-4">
+                    <div class="input-group"><label>Плечо</label><input type="number" id="recPainShoulder" min="0" max="10" placeholder="0-10"></div>
+                    <div class="input-group"><label>Поясница</label><input type="number" id="recPainBack" min="0" max="10" placeholder="0-10"></div>
+                    <div class="input-group"><label>Локоть</label><input type="number" id="recPainElbow" min="0" max="10" placeholder="0-10"></div>
+                    <div class="input-group"><label>Колено</label><input type="number" id="recPainKnee" min="0" max="10" placeholder="0-10"></div>
+                </div>
+                <button class="btn btn-accent" style="margin-top:12px;" onclick="addRecovery()">💾 Записать</button>
+            </div>
+            <div class="card"><h3>📋 История</h3><div id="recoveryHistory" style="max-height:300px;overflow-y:auto;"></div></div>
+        </section>
+
+        <!-- Biomechanics -->
+        <section class="section" id="section-biomechanics">
+            <h2>🦴 Биомеханика</h2>
+            <p class="subtitle">Состояние опорно-двигательного аппарата</p>
+            <div class="card">
+                <div class="grid-2">
+                    <div class="input-group"><label>Дата</label><input type="date" id="bioDate"></div>
+                    <div class="input-group"><label>Поясница</label><input type="text" id="bioBack" placeholder="Как себя чувствует"></div>
+                    <div class="input-group"><label>Таз</label><input type="text" id="bioPelvis"></div>
+                    <div class="input-group"><label>Плечи</label><input type="text" id="bioShoulders"></div>
+                    <div class="input-group"><label>Шея</label><input type="text" id="bioNeck"></div>
+                </div>
+                <div class="input-group"><label>Комментарии</label><textarea id="bioComments" rows="2"></textarea></div>
+                <button class="btn btn-accent" style="margin-top:12px;" onclick="addBiomechanics()">💾 Записать</button>
+            </div>
+            <div class="card"><h3>📋 История</h3><div id="bioHistory" style="max-height:300px;overflow-y:auto;"></div></div>
+        </section>
+
+        <!-- Training -->
+        <section class="section" id="section-training">
+            <h2>🏋️ Тренировки</h2>
+            <p class="subtitle">Push / Pull / Legs + Arms</p>
+            <div class="card">
+                <div class="input-inline">
+                    <div class="input-group"><label>Дата</label><input type="date" id="trainDate"></div>
+                    <div class="input-group"><label>Тип тренировки</label><select id="trainType"><option>Push</option><option>Pull</option><option>Legs</option><option>Arms</option><option>Другое</option></select></div>
+                </div>
+                <div id="trainExercises"></div>
+                <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addExerciseRow()">+ Добавить упражнение</button>
+                <button class="btn btn-accent" style="margin-top:12px;display:block;" onclick="saveTraining()">💾 Сохранить тренировку</button>
+            </div>
+            <div class="card"><h3>📋 История тренировок</h3><div id="trainingHistory" style="max-height:400px;overflow-y:auto;"></div></div>
+        </section>
+
+        <!-- Progress -->
+        <section class="section" id="section-progress">
+            <h2>📈 График прогрессии</h2>
+            <p class="subtitle">Динамика рабочих весов</p>
+            <div class="card">
+                <div class="input-group"><label>Выбери упражнение</label><select id="progressExercise" onchange="renderProgressChart()"></select></div>
+                <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- Records -->
+        <section class="section" id="section-records">
+            <h2>🏆 Личные рекорды</h2>
+            <p class="subtitle">Максимальные достижения</p>
+            <div id="recordsList"></div>
+            <div class="card">
+                <div class="input-inline">
+                    <div class="input-group"><label>Упражнение</label><input type="text" id="recExercise" placeholder="Жим лёжа"></div>
+                    <div class="input-group"><label>Вес × Повторы</label><input type="text" id="recWeightReps" placeholder="110×3"></div>
+                    <button class="btn btn-accent btn-sm" onclick="addRecord()">+</button>
+                </div>
+                <p style="font-size:0.7rem;color:var(--text2);">Предполагаемый максимум считается автоматически по формуле Эйпли</p>
+            </div>
+        </section>
+
+        <!-- Weekly Plan -->
+        <section class="section" id="section-weekly-plan">
+            <h2>📅 План на неделю</h2>
+            <p class="subtitle">Расписание тренировок</p>
+            <div id="weeklyPlanList" class="grid-2"></div>
+            <div class="card">
+                <div class="input-inline">
+                    <div class="input-group"><label>День</label><select id="planDay"><option>Пн</option><option>Вт</option><option>Ср</option><option>Чт</option><option>Пт</option><option>Сб</option><option>Вс</option></select></div>
+                    <div class="input-group"><label>Активность</label><input type="text" id="planActivity" placeholder="Push"></div>
+                    <button class="btn btn-accent btn-sm" onclick="addWeeklyPlan()">+</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checklist -->
+        <section class="section" id="section-checklist">
+            <h2>✅ Чек-лист</h2>
+            <p class="subtitle">Ежедневные привычки</p>
+            <div id="checklistItems"></div>
+            <div class="card">
+                <div class="input-inline">
+                    <div class="input-group"><label>Задача</label><input type="text" id="checkItem" placeholder="Белок 170+"></div>
+                    <div class="input-group"><label>Цель</label><input type="text" id="checkTarget" placeholder="170 г"></div>
+                    <button class="btn btn-accent btn-sm" onclick="addChecklistItem()">+</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Hidden modal for set details -->
+    <div class="modal-overlay" id="setModal" style="display:none;">
+        <div class="modal">
+            <h3>🏋️ Подходы</h3>
+            <div id="setModalContent"></div>
+            <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addSetRow()">+ Подход</button>
+            <button class="btn btn-accent" style="margin-top:12px;" onclick="closeSetModal()">Готово</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA MANAGER ====================
+        const LS = {
+            get(key, def = null) {
+                try { const v = localStorage.getItem('athleteos_' + key); return v ? JSON.parse(v) :
+                        def; } catch (e) { return def; }
+            },
+            set(key, val) { localStorage.setItem('athleteos_' + key, JSON.stringify(val)); },
+            remove(key) { localStorage.removeItem('athleteos_' + key); }
+        };
+
+        // Initialize defaults
+        function initData() {
+            if (!LS.get('profile')) LS.set('profile', { height: '', weight: '', age: '', photo: '',
+                measurements: {}, measHistory: [] });
+            if (!LS.get('goals')) LS.set('goals', []);
+            if (!LS.get('photos')) LS.set('photos', {});
+            if (!LS.get('nutrition')) LS.set('nutrition', []);
+            if (!LS.get('supplements')) LS.set('supplements', [{ name: 'Креатин', dose: '5 г', taken: false }, { name: 'Омега',
+                dose: '2 капс', taken: false }, { name: 'Магний', dose: '400 мг', taken: false }, { name: 'Витамин D',
+                dose: '1 капс', taken: false }, { name: 'Цинк', dose: '1 таб', taken: false }, { name: 'Аргинин',
+                dose: '6 г', taken: false }
+            ]);
+            if (!LS.get('sleep')) LS.set('sleep', []);
+            if (!LS.get('cardio')) LS.set('cardio', []);
+            if (!LS.get('training')) LS.set('training', []);
+            if (!LS.get('recovery')) LS.set('recovery', []);
+            if (!LS.get('biomechanics')) LS.set('biomechanics', []);
+            if (!LS.get('weeklyPlan')) LS.set('weeklyPlan', [{ day: 'Пн', activity: 'Push' }, { day: 'Вт',
+                activity: 'Bike' }, { day: 'Ср', activity: 'Legs' }, { day: 'Чт', activity: 'Pool' }, { day: 'Пт',
+                activity: 'Pull' }, { day: 'Сб', activity: 'Arms' }, { day: 'Вс', activity: 'Отдых' }]);
+            if (!LS.get('checklist')) LS.set('checklist', [{ item: 'Белок 170+', target: '170 г', done: false },
+                { item: 'Вода 3 л', target: '3 л', done: false }, { item: 'Сон 7+', target: '7 ч', done: false },
+                { item: 'Креатин', target: '5 г', done: false }, { item: 'Кардио', target: '30 мин', done: false },
+                { item: 'Растяжка', target: '10 мин', done: false }
+            ]);
+            if (!LS.get('records')) LS.set('records', []);
+        }
+
+        // ==================== NAVIGATION ====================
+        document.querySelectorAll('.sidebar-nav button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove(
+                    'active'));
+                btn.classList.add('active');
+                const sectionId = btn.dataset.section;
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                const sec = document.getElementById('section-' + sectionId);
+                if (sec) sec.classList.add('active');
+                if (sectionId === 'dashboard') renderDashboard();
+                if (sectionId === 'progress') { populateProgressExercises();
+                    renderProgressChart(); }
+                if (sectionId === 'training') renderTrainingExercises();
+                if (sectionId === 'profile') loadProfileForm();
+                if (sectionId === 'goals') renderGoals();
+                if (sectionId === 'photos') renderPhotos();
+                if (sectionId === 'nutrition') { renderNutritionHistory();
+                    renderNutritionAvg(); }
+                if (sectionId === 'supplements') renderSupplements();
+                if (sectionId === 'sleep') renderSleepHistory();
+                if (sectionId === 'cardio') renderCardioHistory();
+                if (sectionId === 'recovery') renderRecoveryHistory();
+                if (sectionId === 'biomechanics') renderBioHistory();
+                if (sectionId === 'training') renderTrainingHistory();
+                if (sectionId === 'records') renderRecords();
+                if (sectionId === 'weekly-plan') renderWeeklyPlan();
+                if (sectionId === 'checklist') renderChecklist();
+                document.getElementById('mainContent').scrollTop = 0;
+            });
+        });
+
+        // ==================== DASHBOARD ====================
+        function renderDashboard() {
+            const profile = LS.get('profile');
+            const nutrition = LS.get('nutrition');
+            const training = LS.get('training');
+            const sleepData = LS.get('sleep');
+            const recovery = LS.get('recovery');
+            const weeklyPlan = LS.get('weeklyPlan');
+
+            const weight = profile.weight || '—';
+            const last7Nutrition = nutrition.slice(-7);
+            const nutCount = last7Nutrition.filter(n => n.protein > 0 || n.kcal > 0).length;
+            const nutritionPct = nutCount > 0 ? Math.round((nutCount / Math.min(7, Math.max(1, last7Nutrition.length))) *
+                100) : 0;
+            const last7Training = training.slice(-7);
+            const trainCount = last7Training.length;
+            const trainingPct = Math.round((trainCount / Math.min(5, Math.max(1, 5))) * 100);
+            const lastSleep = sleepData.slice(-1)[0];
+            const avgSleep = sleepData.slice(-7).reduce((a, s) => a + (parseFloat(s.hours) || 0), 0) / Math.max(1, sleepData
+                .slice(-7).length);
+            const lastRecovery = recovery.slice(-1)[0];
+            const wellbeing = lastRecovery ? Math.round((parseInt(lastRecovery.energy) + parseInt(lastRecovery.motivation)) /
+                2) : '—';
+
+            const today = new Date().toLocaleDateString('ru-RU', { weekday: 'short' });
+            const planToday = weeklyPlan.find(p => p.day.toLowerCase().startsWith(today.toLowerCase().slice(0, 2)));
+            const nextWorkout = planToday ? planToday.activity : 'Отдых';
+
+            const weeklyWeightData = [];
+            const measHistory = profile.measHistory || [];
+            const allWeights = [];
+            if (profile.weight) allWeights.push({ date: new Date().toISOString().slice(0, 10), weight: parseFloat(profile
+                    .weight) });
+            measHistory.forEach(m => { if (m.weight) allWeights.push({ date: m.date, weight: parseFloat(m.weight) }); });
+            allWeights.sort((a, b) => a.date.localeCompare(b.date));
+            const last7Weights = allWeights.slice(-14);
+            const weeklyAvgWeight = last7Weights.length > 0 ? (last7Weights.reduce((a, w) => a + w.weight, 0) / last7Weights
+                .length).toFixed(1) : '—';
+
+            document.getElementById('dashStats').innerHTML = `
+            <div class="stat-box"><div class="val accent-val">${weight}</div><div class="lbl">Вес (кг)</div></div>
+            <div class="stat-box"><div class="val">${weeklyAvgWeight}</div><div class="lbl">Средний вес за нед.</div></div>
+            <div class="stat-box"><div class="val green-val">${nutritionPct}%</div><div class="lbl">Питание</div></div>
+            <div class="stat-box"><div class="val green-val">${trainingPct}%</div><div class="lbl">Тренировки</div></div>
+            <div class="stat-box"><div class="val">${avgSleep.toFixed(1) || '—'}</div><div class="lbl">Сон (часы)</div></div>
+            <div class="stat-box"><div class="val">${wellbeing}</div><div class="lbl">Самочувствие /10</div></div>
+            <div class="stat-box"><div class="val">${nextWorkout}</div><div class="lbl">След. тренировка</div></div>
+          `;
+
+            // Athlete Index
+            const recoveryScore = lastRecovery ? ((parseInt(lastRecovery.energy) || 5) + (parseInt(lastRecovery
+                .motivation) || 5)) / 2 * 10 : 50;
+            const cardioData = LS.get('cardio').slice(-7);
+            const cardioScore = cardioData.length > 0 ? Math.min(100, cardioData.length / 5 * 100) : 50;
+            const indexScore = Math.round(
+                (trainingPct * 0.25) + (nutritionPct * 0.20) + (Math.min(100, trainCount * 20) * 0.15) +
+                (recoveryScore * 0.15) + (cardioScore * 0.15) + (nutritionPct > 50 ? 70 : 40) * 0.10
+            );
+            const idxClass = indexScore >= 80 ? 'high' : indexScore >= 55 ? 'mid' : 'low';
+            document.getElementById('athleteIndexDisplay').innerHTML = `
+            <div class="index-circle ${idxClass}">${indexScore}</div>
+            <p style="margin-top:8px;font-weight:600;">из 100</p>
+          `;
+
+            document.getElementById('nextWorkout').textContent = '🏋️ ' + nextWorkout;
+            document.getElementById('weeklyProgressSummary').textContent = last7Training.length > 0 ?
+                `Тренировок на этой неделе: ${trainCount} | Питание: ${nutritionPct}% выполнено` :
+                'Начни записывать тренировки, чтобы видеть прогресс';
+
+            // Weight chart
+            renderWeightChart(allWeights);
+        }
+
+        let weightChartInstance = null;
+
+        function renderWeightChart(weightData) {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if (weightChartInstance) weightChartInstance.destroy();
+            const labels = weightData.map(w => w.date);
+            const values = weightData.map(w => w.weight);
+            weightChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Вес (кг)',
+                        data: values,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245,158,11,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#f59e0b',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#a0a0b0' } } },
+                    scales: {
+                        x: { ticks: { color: '#a0a0b0', maxTicksLimit: 10 }, grid: { color: '#2a2a35' } },
+                        y: { ticks: { color: '#a0a0b0' }, grid: { color: '#2a2a35' } }
+                    }
+                }
+            });
+        }
+
+        // ==================== PROFILE ====================
+        function loadProfileForm() {
+            const p = LS.get('profile');
+            document.getElementById('profHeight').value = p.height || '';
+            document.getElementById('profWeight').value = p.weight || '';
+            document.getElementById('profAge').value = p.age || '';
+            document.getElementById('profPhoto').value = p.photo || '';
+            document.getElementById('measWaist').value = p.measurements?.waist || '';
+            document.getElementById('measChest').value = p.measurements?.chest || '';
+            document.getElementById('measBiceps').value = p.measurements?.biceps || '';
+            document.getElementById('measForearm').value = p.measurements?.forearm || '';
+            document.getElementById('measThigh').value = p.measurements?.thigh || '';
+            document.getElementById('measCalves').value = p.measurements?.calves || '';
+            document.getElementById('measNeck').value = p.measurements?.neck || '';
+            renderMeasurementHistory();
+        }
+
+        function saveProfile() {
+            const p = LS.get('profile');
+            p.height = document.getElementById('profHeight').value;
+            p.weight = document.getElementById('profWeight').value;
+            p.age = document.getElementById('profAge').value;
+            p.photo = document.getElementById('profPhoto').value;
+            LS.set('profile', p);
+            alert('✅ Профиль сохранён!');
+        }
+
+        function saveMeasurements() {
+            const p = LS.get('profile');
+            const meas = {
+                date: new Date().toISOString().slice(0, 10),
+                waist: document.getElementById('measWaist').value,
+                chest: document.getElementById('measChest').value,
+                biceps: document.getElementById('measBiceps').value,
+                forearm: document.getElementById('measForearm').value,
+                thigh: document.getElementById('measThigh').value,
+                calves: document.getElementById('measCalves').value,
+                neck: document.getElementById('measNeck').value,
+                weight: document.getElementById('profWeight').value,
+            };
+            p.measurements = { ...meas };
+            if (!p.measHistory) p.measHistory = [];
+            p.measHistory.push(meas);
+            LS.set('profile', p);
+            renderMeasurementHistory();
+            alert('✅ Замеры записаны!');
+        }
+
+        function renderMeasurementHistory() {
+            const p = LS.get('profile');
+            const hist = p.measHistory || [];
+            const div = document.getElementById('measurementHistory');
+            if (hist.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Нет записей</p>'; return; }
+            div.innerHTML = '<table><thead><tr><th>Дата</th><th>Вес</th><th>Талия</th><th>Грудь</th><th>Бицепс</th><th>Бедро</th></tr></thead><tbody>' +
+                hist.slice().reverse().map(m => `
+            <tr><td>${m.date}</td><td>${m.weight||'—'}</td><td>${m.waist||'—'}</td><td>${m.chest||'—'}</td><td>${m.biceps||'—'}</td><td>${m.thigh||'—'}</td></tr>
+          `).join('') + '</tbody></table>';
+        }
+
+        // ==================== GOALS ====================
+        function renderGoals() {
+            const goals = LS.get('goals');
+            document.getElementById('goalsList').innerHTML = goals.map((g, i) => `
+            <div class="card">
+              <strong>${g.name}</strong>
+              <span style="color:var(--text2);"> | ${g.start} → ${g.target}</span>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${g.progress||50}%;"></div></div>
+              <small>Текущее: ${g.current}</small>
+              <button class="btn btn-sm btn-danger" style="float:right;" onclick="deleteGoal(${i})">Удалить</button>
+            </div>
+          `).join('') || '<p style="color:var(--text2);">Цели пока не заданы</p>';
+        }
+
+        function addGoal() {
+            const goals = LS.get('goals');
+            goals.push({
+                name: document.getElementById('goalName').value,
+                start: document.getElementById('goalStart').value,
+                target: document.getElementById('goalTarget').value,
+                current: document.getElementById('goalCurrent').value,
+                progress: 50
+            });
+            LS.set('goals', goals);
+            renderGoals();
+            ['goalName', 'goalStart', 'goalTarget', 'goalCurrent'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function deleteGoal(i) { const g = LS.get('goals');
+            g.splice(i, 1);
+            LS.set('goals', g);
+            renderGoals(); }
+
+        // ==================== PHOTOS ====================
+        function renderPhotos() {
+            const photos = LS.get('photos');
+            const div = document.getElementById('photosGallery');
+            const weeks = Object.keys(photos).sort((a, b) => a - b);
+            if (weeks.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Фото не добавлены</p>'; return; }
+            div.innerHTML = weeks.map(w => `
+            <div class="card">
+              <h3>Неделя ${w}</h3>
+              ${photos[w].front ? `<img src="${photos[w].front}" style="width:100%;border-radius:8px;margin:4px 0;" alt="Спереди"><small>Спереди</small>` : ''}
+              ${photos[w].side ? `<img src="${photos[w].side}" style="width:100%;border-radius:8px;margin:4px 0;" alt="Сбоку"><small>Сбоку</small>` : ''}
+              ${photos[w].back ? `<img src="${photos[w].back}" style="width:100%;border-radius:8px;margin:4px 0;" alt="Сзади"><small>Сзади</small>` : ''}
+            </div>
+          `).join('');
+        }
+
+        function addPhoto() {
+            const photos = LS.get('photos');
+            const week = document.getElementById('photoWeek').value;
+            const angle = document.getElementById('photoAngle').value;
+            const url = document.getElementById('photoURL').value;
+            if (!week || !url) return;
+            if (!photos[week]) photos[week] = {};
+            const angleKey = angle === 'Спереди' ? 'front' : angle === 'Сбоку' ? 'side' : 'back';
+            photos[week][angleKey] = url;
+            LS.set('photos', photos);
+            renderPhotos();
+            document.getElementById('photoURL').value = '';
+        }
+
+        // ==================== NUTRITION ====================
+        function addNutrition() {
+            const nutrition = LS.get('nutrition');
+            nutrition.push({
+                date: document.getElementById('nutDate').value || new Date().toISOString().slice(0, 10),
+                protein: document.getElementById('nutProtein').value,
+                fat: document.getElementById('nutFat').value,
+                carbs: document.getElementById('nutCarbs').value,
+                kcal: document.getElementById('nutKcal').value,
+                water: document.getElementById('nutWater').value,
+                fiber: document.getElementById('nutFiber').value,
+                salt: document.getElementById('nutSalt').value,
+                mood: document.getElementById('nutMood').value,
+                hunger: document.getElementById('nutHunger').value,
+            });
+            LS.set('nutrition', nutrition);
+            renderNutritionHistory();
+            renderNutritionAvg();
+            ['nutProtein', 'nutFat', 'nutCarbs', 'nutKcal', 'nutWater', 'nutFiber', 'nutSalt', 'nutMood', 'nutHunger']
+                .forEach(id => document.getElementById(id).value = '');
+        }
+
+        function renderNutritionHistory() {
+            const nutrition = LS.get('nutrition');
+            const div = document.getElementById('nutritionHistory');
+            if (nutrition.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Нет записей</p>'; return; }
+            div.innerHTML = '<table><thead><tr><th>Дата</th><th>Белки</th><th>Жиры</th><th>Угл.</th><th>Ккал</th><th>Вода</th><th>Настр.</th></tr></thead><tbody>' +
+                nutrition.slice().reverse().slice(0, 30).map(n => `
+            <tr><td>${n.date}</td><td>${n.protein||'—'}</td><td>${n.fat||'—'}</td><td>${n.carbs||'—'}</td><td>${n.kcal||'—'}</td><td>${n.water||'—'}</td><td>${n.mood||'—'}</td></tr>
+          `).join('') + '</tbody></table>';
+        }
+
+        function renderNutritionAvg() {
+            const nutrition = LS.get('nutrition').slice(-7);
+            const div = document.getElementById('nutritionAvg');
+            if (nutrition.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Нет данных</p>'; return; }
+            const avg = (key) => (nutrition.reduce((a, n) => a + (parseFloat(n[key]) || 0), 0) / nutrition.length).toFixed(
+            1);
+            div.innerHTML = `
+            <div class="stat-box"><div class="val">${avg('protein')}</div><div class="lbl">Белки (г)</div></div>
+            <div class="stat-box"><div class="val">${avg('fat')}</div><div class="lbl">Жиры (г)</div></div>
+            <div class="stat-box"><div class="val">${avg('carbs')}</div><div class="lbl">Углеводы (г)</div></div>
+            <div class="stat-box"><div class="val">${avg('kcal')}</div><div class="lbl">Ккал</div></div>
+          `;
+        }
+
+        // ==================== SUPPLEMENTS ====================
+        function renderSupplements() {
+            const supps = LS.get('supplements');
+            document.getElementById('supplementsList').innerHTML = supps.map((s, i) => `
+            <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
+              <span><strong>${s.name}</strong> <span style="color:var(--text2);">${s.dose}</span></span>
+              <span>
+                <button class="btn btn-sm ${s.taken?'btn-accent':'btn-outline'}" onclick="toggleSupplement(${i})">${s.taken?'✅ Выпил':'❌ Не выпил'}</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteSupplement(${i})">🗑</button>
+              </span>
+            </div>
+          `).join('');
+        }
+
+        function toggleSupplement(i) { const s = LS.get('supplements');
+            s[i].taken = !s[i].taken;
+            LS.set('supplements', s);
+            renderSupplements(); }
+
+        function addSupplement() {
+            const s = LS.get('supplements');
+            s.push({ name: document.getElementById('suppName').value, dose: document.getElementById('suppDose').value,
+                taken: false });
+            LS.set('supplements', s);
+            renderSupplements();
+            document.getElementById('suppName').value = '';
+            document.getElementById('suppDose').value = '';
+        }
+
+        function deleteSupplement(i) { const s = LS.get('supplements');
+            s.splice(i, 1);
+            LS.set('supplements', s);
+            renderSupplements(); }
+
+        // ==================== SLEEP ====================
+        function addSleep() {
+            const sleep = LS.get('sleep');
+            sleep.push({
+                date: document.getElementById('sleepDate').value || new Date().toISOString().slice(0, 10),
+                bedTime: document.getElementById('sleepBed').value,
+                wakeTime: document.getElementById('sleepWake').value,
+                hours: document.getElementById('sleepHours').value,
+                quality: document.getElementById('sleepQuality').value,
+                awakenings: document.getElementById('sleepAwakenings').value,
+            });
+            LS.set('sleep', sleep);
+            renderSleepHistory();
+            ['sleepBed', 'sleepWake', 'sleepHours', 'sleepQuality', 'sleepAwakenings'].forEach(id => document
+        .getElementById(id).value = '');
+        }
+        function renderSleepHistory() {
+            const sleep = LS.get('sleep');
+            const div = document.getElementById('sleepHistory');
+            if (sleep.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Нет записей</p>'; return; }
+            div.innerHTML = '<table><thead><tr><th>Дата</th><th>Лёг</th><th>Встал</th><th>Часы</th><th>Качество</th><th>Пробужд.</th></tr></thead><tbody>' +
+                sleep.slice().reverse().slice(0, 30).map(s => `
+            <tr><td>${s.date}</td><td>${s.bedTime||'—'}</td><td>${s.wakeTime||'—'}</td><td>${s.hours||'—'}</td><td>${s.quality||'—'}/10</td><td>${s.awakenings||'—'}</td></tr>
+          `).join('') + '</tbody></table>';
+        }
+
+        // ==================== CARDIO ====================
+        function addCardio() {
+            const cardio = LS.get('cardio');
+            cardio.push({
+                date: document.getElementById('cardioDate').value || new Date().toISOString().slice(0, 10),
+                bikeKm: document.getElementById('cardioBikeKm').value,
+                bikeMin: document.getElementById('cardioBikeMin').value,
+                poolMin: document.getElementById('cardioPoolMin').value,
+                steps: document.getElementById('cardioSteps').value,
+                heartRate: document.getElementById('cardioHR').value,
+            });
+            LS.set('cardio', cardio);
+            renderCardioHistory();
+            ['cardioBikeKm', 'cardioBikeMin', 'cardioPoolMin', 'cardioSteps', 'cardioHR'].forEach(id => document
+        .getElementById(id).value = '');
+        }
+        function renderCardioHistory() {
+            const cardio = LS.get('cardio');
+            const div = document.getElementById('cardioHistory');
+            if (cardio.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Нет записей</p>'; return; }
+            div.innerHTML = '<table><thead><tr><th>Дата</th><th>Вело (км)</th><th>Вело (мин)</th><th>Бассейн (мин)</th><th>Шаги</th><th>Пульс</th></tr></thead><tbody>' +
+                cardio.slice().reverse().slice(0, 30).map(c => `
+            <tr><td>${c.date}</td><td>${c.bikeKm||'—'}</td><td>${c.bikeMin||'—'}</td><td>${c.poolMin||'—'}</td><td>${c.steps||'—'}</td><td>${c.heartRate||'—'}</td></tr>
+          `).join('') + '</tbody></table>';
+        }
+
+        // ==================== RECOVERY ====================
+        function addRecovery() {
+            const recovery = LS.get('recovery');
+            recovery.push({
+                date: document.getElementById('recDate').value || new Date().toISOString().slice(0, 10),
+                energy: document.getElementById('recEnergy').value,
+                motivation: document.getElementById('recMotivation').value,
+                stress: document.getElementById('recStress').value,
+                appetite: document.getElementById('recAppetite').value,
+                pains: {
+                    shoulder: document.getElementById('recPainShoulder').value,
+                    lowerBack: document.getElementById('recPainBack').value,
+                    elbow: document.getElementById('recPainElbow').value,
+                    knee: document.getElementById('recPainKnee').value,
+                }
+            });
+            LS.set('recovery', recovery);
+            renderRecoveryHistory();
+            ['recEnergy', 'recMotivation', 'recStress', 'recAppetite', 'recPainShoulder', 'recPainBack', 'recPainElbow',
+                'recPainKnee'
+            ].forEach(id => document.getElementById(id).value = '');
+        }
+        function renderRecoveryHistory() {
+            const recovery = LS.get('recovery');
+            const div = document.getElementById('recoveryHistory');
+            if (recovery.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Нет записей</p>'; return; }
+            div.innerHTML = '<table><thead><tr><th>Дата</th><th>Энергия</th><th>Мотивация</th><th>Стресс</th><th>Аппетит</th><th>Плечо</th><th>Поясн.</th></tr></thead><tbody>' +
+                recovery.slice().reverse().slice(0, 30).map(r => `
+            <tr><td>${r.date}</td><td>${r.energy||'—'}</td><td>${r.motivation||'—'}</td><td>${r.stress||'—'}</td><td>${r.appetite||'—'}</td><td>${r.pains?.shoulder||'—'}</td><td>${r.pains?.lowerBack||'—'}</td></tr>
+          `).join('') + '</tbody></table>';
+        }
+
+        // ==================== BIOMECHANICS ====================
+        function addBiomechanics() {
+            const bio = LS.get('biomechanics');
+            bio.push({
+                date: document.getElementById('bioDate').value || new Date().toISOString().slice(0, 10),
+                lowerBack: document.getElementById('bioBack').value,
+                pelvis: document.getElementById('bioPelvis').value,
+                shoulders: document.getElementById('bioShoulders').value,
+                neck: document.getElementById('bioNeck').value,
+                comments: document.getElementById('bioComments').value,
+            });
+            LS.set('biomechanics', bio);
+            renderBioHistory();
+            ['bioBack', 'bioPelvis', 'bioShoulders', 'bioNeck', 'bioComments'].forEach(id => document.getElementById(id)
+                .value = '');
+        }
+        function renderBioHistory() {
+            const bio = LS.get('biomechanics');
+            const div = document.getElementById('bioHistory');
+            if (bio.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Нет записей</p>'; return; }
+            div.innerHTML = '<table><thead><tr><th>Дата</th><th>Поясница</th><th>Таз</th><th>Плечи</th><th>Шея</th><th>Комментарий</th></tr></thead><tbody>' +
+                bio.slice().reverse().slice(0, 30).map(b => `
+            <tr><td>${b.date}</td><td>${b.lowerBack||'—'}</td><td>${b.pelvis||'—'}</td><td>${b.shoulders||'—'}</td><td>${b.neck||'—'}</td><td>${b.comments||'—'}</td></tr>
+          `).join('') + '</tbody></table>';
+        }
+
+        // ==================== TRAINING ====================
+        let tempExercises = [];
+        let currentSetEditExercise = -1;
+
+        function renderTrainingExercises() {
+            tempExercises = [
+                { name: '', sets: [{ weight: '', reps: '', rir: '', completed: false }] },
+                { name: '', sets: [{ weight: '', reps: '', rir: '', completed: false }] },
+            ];
+            renderTrainExUI();
+        }
+
+        function renderTrainExUI() {
+            const div = document.getElementById('trainExercises');
+            div.innerHTML = tempExercises.map((ex, i) => `
+            <div class="card" style="margin-bottom:8px;">
+              <div class="input-inline">
+                <div class="input-group"><label>Упражнение</label><input type="text" value="${ex.name}" onchange="tempExercises[${i}].name=this.value" placeholder="Жим лёжа"></div>
+                <button class="btn btn-sm btn-outline" onclick="openSetModal(${i})">🏋️ Подходы (${ex.sets.length})</button>
+                <button class="btn btn-sm btn-danger" onclick="tempExercises.splice(${i},1);renderTrainExUI();">✕</button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        function addExerciseRow() {
+            tempExercises.push({ name: '', sets: [{ weight: '', reps: '', rir: '', completed: false }] });
+            renderTrainExUI();
+        }
+
+        function openSetModal(idx) {
+            currentSetEditExercise = idx;
+            const ex = tempExercises[idx];
+            document.getElementById('setModal').style.display = 'flex';
+            document.getElementById('setModalContent').innerHTML = ex.sets.map((s, si) => `
+            <div class="input-inline" style="margin-bottom:6px;">
+              <div class="input-group"><label>Вес</label><input type="number" value="${s.weight}" onchange="tempExercises[${idx}].sets[${si}].weight=this.value" placeholder="60"></div>
+              <div class="input-group"><label>Повторы</label><input type="number" value="${s.reps}" onchange="tempExercises[${idx}].sets[${si}].reps=this.value" placeholder="10"></div>
+              <div class="input-group"><label>RIR</label><input type="number" value="${s.rir}" onchange="tempExercises[${idx}].sets[${si}].rir=this.value" placeholder="2"></div>
+              <label style="display:flex;align-items:center;gap:4px;"><input type="checkbox" ${s.completed?'checked':''} onchange="tempExercises[${idx}].sets[${si}].completed=this.checked"> Вып.</label>
+              <button class="btn btn-sm btn-danger" onclick="tempExercises[${idx}].sets.splice(${si},1);openSetModal(${idx});">✕</button>
+            </div>
+          `).join('');
+        }
+
+        function addSetRow() {
+            if (currentSetEditExercise < 0) return;
+            tempExercises[currentSetEditExercise].sets.push({ weight: '', reps: '', rir: '', completed: false });
+            openSetModal(currentSetEditExercise);
+        }
+
+        function closeSetModal() {
+            document.getElementById('setModal').style.display = 'none';
+            renderTrainExUI();
+        }
+
+        function saveTraining() {
+            const training = LS.get('training');
+            training.push({
+                date: document.getElementById('trainDate').value || new Date().toISOString().slice(0, 10),
+                type: document.getElementById('trainType').value,
+                exercises: JSON.parse(JSON.stringify(tempExercises.filter(e => e.name.trim() !== ''))),
+            });
+            LS.set('training', training);
+            renderTrainingHistory();
+            tempExercises = [{ name: '', sets: [{ weight: '', reps: '', rir: '', completed: false }] }];
+            renderTrainExUI();
+            alert('✅ Тренировка сохранена!');
+        }
+
+        function renderTrainingHistory() {
+            const training = LS.get('training');
+            const div = document.getElementById('trainingHistory');
+            if (training.length === 0) { div.innerHTML = '<p style="color:var(--text2);">Нет записей</p>'; return; }
+            div.innerHTML = training.slice().reverse().slice(0, 20).map((t, ti) => `
+            <div class="card">
+              <strong>${t.date} — ${t.type}</strong>
+              ${t.exercises.map(ex => `
+                <p style="margin:4px 0;"><em>${ex.name}</em>: ${ex.sets.map(s => `${s.weight}×${s.reps}${s.completed?'✅':''}`).join(' | ')}</p>
+              `).join('')}
+              <button class="btn btn-sm btn-danger" onclick="deleteTraining(${training.length-1-ti})">Удалить</button>
+            </div>
+          `).join('');
+        }
+
+        function deleteTraining(i) { const t = LS.get('training');
+            t.splice(i, 1);
+            LS.set('training', t);
+            renderTrainingHistory(); }
+
+        // ==================== PROGRESS CHART ====================
+        let progressChartInstance = null;
+
+        function populateProgressExercises() {
+            const training = LS.get('training');
+            const exercises = new Set();
+            training.forEach(t => t.exercises.forEach(ex => { if (ex.name) exercises.add(ex.name); }));
+            const sel = document.getElementById('progressExercise');
+            sel.innerHTML = [...exercises].map(e => `<option>${e}</option>`).join('');
+            if (exercises.size === 0) sel.innerHTML = '<option>—</option>';
+        }
+
+        function renderProgressChart() {
+            const exerciseName = document.getElementById('progressExercise').value;
+            if (!exerciseName || exerciseName === '—') return;
+            const training = LS.get('training');
+            const data = [];
+            training.forEach(t => {
+                t.exercises.forEach(ex => {
+                    if (ex.name === exerciseName && ex.sets.length > 0) {
+                        const maxSet = ex.sets.reduce((a, s) => {
+                            const w = parseFloat(s.weight) || 0;
+                            return w > (parseFloat(a.weight) || 0) ? s : a;
+                        }, ex.sets[0]);
+                        data.push({ date: t.date, weight: parseFloat(maxSet.weight) || 0, reps: parseInt(
+                                maxSet.reps) || 0 });
+                    }
+                });
+            });
+            data.sort((a, b) => a.date.localeCompare(b.date));
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            if (progressChartInstance) progressChartInstance.destroy();
+            progressChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [{
+                        label: 'Вес (кг)',
+                        data: data.map(d => d.weight),
+                        backgroundColor: 'rgba(245,158,11,0.6)',
+                        borderColor: '#f59e0b',
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#a0a0b0' } } },
+                    scales: {
+                        x: { ticks: { color: '#a0a0b0' }, grid: { color: '#2a2a35' } },
+                        y: { ticks: { color: '#a0a0b0' }, grid: { color: '#2a2a35' } }
+                    }
+                }
+            });
+        }
+
+        // ==================== RECORDS ====================
+        function renderRecords() {
+            const records = LS.get('records');
+            document.getElementById('recordsList').innerHTML = records.map((r, i) => {
+                const parts = (r.weightReps || '').split('×');
+                const weight = parseFloat(parts[0]) || 0;
+                const reps = parseInt(parts[1]) || 0;
+                const estMax = reps > 0 ? Math.round(weight * (1 + reps / 30)) : 0;
+                return `
+            <div class="card">
+              <strong>${r.exercise}</strong> — ${r.weightReps}
+              <span style="color:var(--accent);font-weight:700;"> | Предп. максимум: ${estMax} кг</span>
+              <button class="btn btn-sm btn-danger" style="float:right;" onclick="deleteRecord(${i})">Удалить</button>
+            </div>`;
+            }).join('') || '<p style="color:var(--text2);">Рекорды пока не установлены</p>';
+        }
+
+        function addRecord() {
+            const records = LS.get('records');
+            records.push({
+                exercise: document.getElementById('recExercise').value,
+                weightReps: document.getElementById('recWeightReps').value,
+            });
+            LS.set('records', records);
+            renderRecords();
+            document.getElementById('recExercise').value = '';
+            document.getElementById('recWeightReps').value = '';
+        }
+
+        function deleteRecord(i) { const r = LS.get('records');
+            r.splice(i, 1);
+            LS.set('records', r);
+            renderRecords(); }
+
+        // ==================== WEEKLY PLAN ====================
+        function renderWeeklyPlan() {
+            const plan = LS.get('weeklyPlan');
+            document.getElementById('weeklyPlanList').innerHTML = plan.map((p, i) => `
+            <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+              <span><strong>${p.day}</strong> — ${p.activity}</span>
+              <button class="btn btn-sm btn-danger" onclick="deleteWeeklyPlan(${i})">🗑</button>
+            </div>
+          `).join('');
+        }
+
+        function addWeeklyPlan() {
+            const plan = LS.get('weeklyPlan');
+            plan.push({ day: document.getElementById('planDay').value, activity: document.getElementById('planActivity')
+                    .value });
+            LS.set('weeklyPlan', plan);
+            renderWeeklyPlan();
+            document.getElementById('planActivity').value = '';
+        }
+
+        function deleteWeeklyPlan(i) { const p = LS.get('weeklyPlan');
+            p.splice(i, 1);
+            LS.set('weeklyPlan', p);
+            renderWeeklyPlan(); }
+
+        // ==================== CHECKLIST ====================
+        function renderChecklist() {
+            const cl = LS.get('checklist');
+            document.getElementById('checklistItems').innerHTML = cl.map((c, i) => `
+            <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
+              <span><strong>${c.item}</strong> <span style="color:var(--text2);">(${c.target})</span></span>
+              <span>
+                <button class="btn btn-sm ${c.done?'btn-accent':'btn-outline'}" onclick="toggleChecklist(${i})">${c.done?'✅':'☐'}</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteChecklist(${i})">🗑</button>
+              </span>
+            </div>
+          `).join('');
+        }
+
+        function toggleChecklist(i) { const c = LS.get('checklist');
+            c[i].done = !c[i].done;
+            LS.set('checklist', c);
+            renderChecklist(); }
+
+        function addChecklistItem() {
+            const c = LS.get('checklist');
+            c.push({ item: document.getElementById('checkItem').value, target: document.getElementById('checkTarget').value,
+                done: false });
+            LS.set('checklist', c);
+            renderChecklist();
+            document.getElementById('checkItem').value = '';
+            document.getElementById('checkTarget').value = '';
+        }
+
+        function deleteChecklist(i) { const c = LS.get('checklist');
+            c.splice(i, 1);
+            LS.set('checklist', c);
+            renderChecklist(); }
+
+        // ==================== PDF EXPORT ====================
+        function exportPDF() {
+            alert(
+                '📄 Сейчас откроется окно печати. Выбери "Сохранить как PDF" в настройках принтера, чтобы экспортировать все данные.');
+            window.print();
+        }
+
+        // ==================== RESET ====================
+        function resetAllData() {
+            if (confirm('⚠️ Ты уверен? Все данные будут удалены безвозвратно!')) {
+                Object.keys(localStorage).filter(k => k.startsWith('athleteos_')).forEach(k => localStorage.removeItem(
+                    k));
+                initData();
+                location.reload();
+            }
+        }
+
+        // ==================== INIT ====================
+        function init() {
+            initData();
+            renderDashboard();
+            loadProfileForm();
+            renderGoals();
+            renderPhotos();
+            renderNutritionHistory();
+            renderNutritionAvg();
+            renderSupplements();
+            renderSleepHistory();
+            renderCardioHistory();
+            renderRecoveryHistory();
+            renderBioHistory();
+            renderTrainingExercises();
+            renderTrainingHistory();
+            renderRecords();
+            renderWeeklyPlan();
+            renderChecklist();
+            populateProgressExercises();
+            // Set today's date for date inputs
+            const today = new Date().toISOString().slice(0, 10);
+            ['nutDate', 'sleepDate', 'cardioDate', 'recDate', 'bioDate', 'trainDate'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.value) el.value = today;
+            });
+        }
+
+        init();
+        console.log('⚡ Athlete OS v1.0 запущена. Все данные сохраняются в localStorage твоего браузера.');
+        console.log('💪 "Вот это был только старт."');
+    </script>
+</body>
+</html>
