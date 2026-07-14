@@ -4,30 +4,26 @@
     <meta charset="UTF-8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Athlete OS">
+    <meta name="apple-mobile-web-app-title" content="Тренировки">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <link rel="apple-touch-icon" href="icon-180.png">
     <link rel="manifest" href="manifest.json">
-    <title>Athlete OS</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js">
-    </script>
+    <title>Мои тренировки</title>
     <style>
         :root {
-            --bg: #f7f5f0;
-            --surface: #ffffff;
-            --surface2: #f0ede6;
-            --border: #e0dcd2;
-            --text: #2c2c2c;
-            --text2: #6b6b6b;
-            --accent: #ff9600;
-            --accent2: #ffb347;
-            --green: #58cc02;
-            --red: #ff4b4b;
-            --blue: #1cb0f6;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-            --transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            --bg: #0f0f13;
+            --card: #1a1a24;
+            --card-hover: #22222e;
+            --text: #f0f0f0;
+            --text2: #a0a0b0;
+            --accent: #ff8c42;
+            --accent-light: #ffaa70;
+            --green: #4ade80;
+            --red: #f87171;
+            --border: #2a2a38;
+            --radius: 18px;
+            --radius-sm: 12px;
+            --transition: 0.25s cubic-bezier(0.2, 0.9, 0.4, 1);
         }
 
         * {
@@ -36,166 +32,139 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-            letter-spacing: -0.01em;
-            user-select: none;
+            min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
         }
-
-        /* Sidebar */
-        .sidebar {
-            width: 240px;
-            min-width: 240px;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
-            z-index: 10;
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
         }
-        .sidebar-logo {
-            padding: 0 20px 20px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 10px;
-        }
-        .sidebar-logo h1 {
-            font-size: 1.3rem;
+        h1 {
+            font-size: 2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--accent), #ff6b35);
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent), #ff5e62);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-align: center;
         }
-        .sidebar-logo small {
-            color: var(--text2);
-            font-size: 0.7rem;
-        }
-        .sidebar-nav {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 0 8px;
-        }
-        .sidebar-nav button {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            border: none;
-            background: transparent;
-            color: var(--text2);
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 500;
-            text-align: left;
-            border-radius: var(--radius-sm);
-            transition: all 0.2s ease;
-            font-family: inherit;
-            letter-spacing: -0.01em;
-        }
-        .sidebar-nav button:hover {
-            background: var(--surface2);
-            color: var(--text);
-        }
-        .sidebar-nav button.active {
-            background: var(--accent);
-            color: white;
-            font-weight: 700;
-            box-shadow: 0 4px 10px rgba(255, 150, 0, 0.3);
-        }
-
-        /* Main area */
-        .main {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-        .section {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-            padding: 30px 36px;
-            background: var(--bg);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-            opacity: 0;
-            transform: translateX(30px);
-            pointer-events: none;
-        }
-        .section.active {
-            opacity: 1;
-            transform: translateX(0);
-            pointer-events: auto;
-        }
-        .section.exit-left {
-            opacity: 0;
-            transform: translateX(-30px);
-        }
-
-        /* Cards */
-        .card {
-            background: var(--surface);
+        .workout-card {
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s ease;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all var(--transition);
         }
-        .card:hover {
-            transform: translateY(-2px);
+        .workout-header {
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
         }
-        .stat-box {
-            background: var(--surface2);
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            text-align: center;
-            flex: 1;
+        .workout-header:hover {
+            background: var(--card-hover);
         }
-        .stat-box .val {
-            font-size: 2rem;
-            font-weight: 800;
+        .workout-type {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.01em;
         }
-        .stat-box .lbl {
-            font-size: 0.7rem;
+        .workout-date {
+            font-size: 0.85rem;
             color: var(--text2);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
-        .accent-val {
+        .workout-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+        .workout-card.open .workout-body {
+            max-height: 2000px;
+            padding: 0 20px 20px;
+        }
+        .exercise {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+        .exercise-name {
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .planned {
+            font-size: 0.8rem;
+            color: var(--text2);
+            font-weight: 400;
+        }
+        .set-row {
+            display: flex;
+            gap: 6px;
+            margin: 6px 0;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .set-row input {
+            background: var(--border);
+            border: none;
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            width: 70px;
+            font-family: inherit;
+        }
+        .set-row input.weight-input {
+            width: 80px;
+        }
+        .set-row input.comment-input {
+            flex: 1;
+            min-width: 120px;
+        }
+        .add-set-btn {
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--text2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 6px;
+        }
+        .add-set-btn:hover {
+            border-color: var(--accent);
             color: var(--accent);
         }
-
-        /* Buttons */
         .btn {
             padding: 10px 20px;
             border-radius: 30px;
             border: none;
             font-weight: 700;
-            font-size: 0.9rem;
             cursor: pointer;
             font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
             letter-spacing: -0.01em;
+            transition: all 0.2s ease;
         }
-        .btn-accent {
+        .btn-primary {
             background: var(--accent);
-            color: white;
-            box-shadow: 0 4px 12px rgba(255, 150, 0, 0.3);
+            color: #000;
+            box-shadow: 0 8px 20px rgba(255, 140, 66, 0.3);
         }
-        .btn-accent:hover {
-            background: var(--accent2);
+        .btn-primary:hover {
+            background: var(--accent-light);
             transform: scale(1.03);
         }
         .btn-outline {
@@ -203,781 +172,253 @@
             border: 2px solid var(--border);
             color: var(--text);
         }
-        .btn-outline:hover {
-            border-color: var(--accent);
-            background: var(--surface2);
-        }
         .btn-sm {
             padding: 6px 14px;
             font-size: 0.8rem;
-            border-radius: 20px;
         }
-        .btn-danger {
-            background: var(--red);
-            color: white;
+        .workout-comment {
+            margin-top: 12px;
         }
-
-        /* Animations */
-        @keyframes bounceIn {
-            0% {
-                transform: scale(0.3);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.08);
-            }
-            70% {
-                transform: scale(0.95);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+        .workout-comment textarea {
+            width: 100%;
+            background: var(--border);
+            border: none;
+            color: var(--text);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
         }
-        .bounce-in {
-            animation: bounceIn 0.6s ease;
+        .save-indicator {
+            font-size: 0.75rem;
+            color: var(--green);
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        @keyframes slideUp {
+        .save-indicator.show {
+            opacity: 1;
+        }
+        @keyframes fadeSlide {
             from {
-                transform: translateY(20px);
                 opacity: 0;
+                transform: translateY(10px);
             }
             to {
+                opacity: 1;
                 transform: translateY(0);
-                opacity: 1;
             }
         }
-        .slide-up {
-            animation: slideUp 0.5s ease forwards;
-        }
-        .praise-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            animation: fadeIn 0.2s ease;
-        }
-        .praise-card {
-            background: white;
-            border-radius: 30px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            animation: bounceIn 0.5s ease;
-            max-width: 300px;
-        }
-        .praise-emoji {
-            font-size: 4rem;
-        }
-        .praise-text {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin: 10px 0;
-            color: var(--accent);
-        }
-
-        /* Toggle */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--border);
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked+.slider {
-            background: var(--accent);
-        }
-        input:checked+.slider:before {
-            transform: translateX(26px);
-        }
-
-        /* Mood selector */
-        .mood-btn {
-            font-size: 2rem;
-            background: var(--surface2);
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s ease;
-        }
-        .mood-btn.selected {
-            border-color: var(--accent);
-            background: var(--accent);
-            transform: scale(1.1);
-        }
-
-        /* Timer */
-        .timer-display {
-            font-size: 3rem;
-            font-weight: 900;
-            text-align: center;
-            margin: 20px 0;
-            letter-spacing: -0.03em;
-        }
-        .timer-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: var(--accent);
-            border-radius: 50%;
-            margin-left: 8px;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.5;
-                transform: scale(1.3);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 700px) {
-            body {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                min-width: 100%;
-                max-height: 120px;
-                flex-shrink: 0;
-                flex-direction: row;
-                padding: 0;
-                align-items: center;
-                overflow-x: auto;
-            }
-            .sidebar-nav {
-                flex-direction: row;
-                padding: 0;
-            }
-            .sidebar-nav button {
-                padding: 8px 12px;
-                font-size: 0.75rem;
-                white-space: nowrap;
-            }
-            .main {
-                padding: 0;
-            }
-            .section {
-                padding: 20px 16px;
-            }
+        .fade-slide {
+            animation: fadeSlide 0.4s ease;
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <h1>⚡ Athlete OS</h1>
-            <small>v2.1 · Твой тренер</small>
-        </div>
-        <nav class="sidebar-nav">
-            <button class="active" data-section="dashboard">📊 Дашборд</button>
-            <button data-section="training">🏋️ Тренировки</button>
-            <button data-section="progress">📈 Прогресс</button>
-            <button data-section="records">🏆 Рекорды</button>
-            <button data-section="plan">📅 План</button>
-        </nav>
-    </aside>
-
-    <!-- Main content -->
-    <main class="main" id="mainContent">
-        <section class="section active" id="section-dashboard"></section>
-        <section class="section" id="section-training"></section>
-        <section class="section" id="section-progress"></section>
-        <section class="section" id="section-records"></section>
-        <section class="section" id="section-plan"></section>
-    </main>
-
-    <!-- Praise overlay -->
-    <div id="praiseContainer" style="display:none;"></div>
+    <div class="container">
+        <h1>🏋️ Мои тренировки</h1>
+        <div id="workoutList"></div>
+        <button class="btn btn-outline" style="width:100%; margin-top:20px;" id="addWorkoutBtn">+ Новая тренировка</button>
+    </div>
 
     <script>
-        // ========== DATA LAYER ==========
-        const LS = {
-            get(key, def = null) {
-                try { const v = localStorage.getItem('athleteos_' + key); return v ? JSON.parse(v) :
-                    def; } catch (e) { return def; }
-            },
-            set(key, val) { localStorage.setItem('athleteos_' + key, JSON.stringify(val)); }
+        // ========== Шаблоны тренировок ==========
+        const workoutTemplates = {
+            'Верх (силовой)': [
+                { name: 'Жим штанги лежа', sets: 4, reps: '5–6', weights: ['90', '95', '100', '90'] },
+                { name: 'Тяга верхнего блока', sets: 4, reps: '8–10', weights: ['70', '70', '75', '75'] },
+                { name: 'Жим гантелей под наклоном', sets: 3, reps: '8–10', weights: ['30', '32', '35'] },
+                { name: 'Тяга сидя к поясу', sets: 3, reps: '10', weights: ['50', '55', '55'] },
+                { name: 'Face Pull', sets: 3, reps: '15', weights: ['27', '30', '27.5'] },
+                { name: 'Подъем штанги на бицепс', sets: 3, reps: '6–8', weights: ['32.5', '32.5', '32.5'] },
+                { name: 'Разгибание рук на блоке', sets: 3, reps: '10–12', weights: ['30', '35', '35'] }
+            ],
+            'Низ': [
+                { name: 'Жим ногами', sets: 4, reps: '10', weights: ['120', '150', '170', '170'] },
+                { name: 'Болгарские приседы', sets: 3, reps: '10', weights: ['12', '12', '12'] },
+                { name: 'Румынская тяга', sets: 3, reps: '10', weights: ['20', '20', '22'] },
+                { name: 'Разгибание ног', sets: 3, reps: '12', weights: ['50', '55', '55'] },
+                { name: 'Ягодичный мост', sets: 3, reps: '12', weights: ['40', '40', '40'] },
+                { name: 'Dead Bug', sets: 3, reps: '12', weights: ['—', '—', '—'] },
+                { name: 'Боковая планка', sets: 3, reps: '30–40 сек', weights: ['—', '—', '—'] }
+            ],
+            'Объемный верх': [
+                { name: 'Жим штанги лежа (без макс.)', sets: 4, reps: '8–10', weights: ['80', '85', '85', '80'] },
+                { name: 'Тяга гантели одной рукой', sets: 3, reps: '10', weights: ['28', '30', '34'] },
+                { name: 'Верхний блок узким хватом', sets: 3, reps: '10–12', weights: ['70', '70', '60'] },
+                { name: 'Обратная бабочка', sets: 3, reps: '15', weights: ['?', '?', '?'] },
+                { name: 'Подъем гантелей на наклонной', sets: 3, reps: '8–10', weights: ['12', '14', '14'] },
+                { name: 'Молотки', sets: 3, reps: '10–12', weights: ['14', '14', '14'] },
+                { name: 'Подъемы в стороны', sets: 3, reps: '12–15', weights: ['8', '10', '10'] }
+            ]
         };
 
-        function initData() {
-            if (!LS.get('onboardingComplete')) LS.set('onboardingComplete', false);
-            if (!LS.get('profile')) LS.set('profile', { name: '', gender: 'М', goal: '', height: '', weight: '',
-                activity: '', targetWeight: '', dailyLog: [] });
-            if (!LS.get('training')) LS.set('training', []);
-            if (!LS.get('plan')) LS.set('plan', [
-                { day: 'Пн', activity: 'Push' }, { day: 'Вт', activity: 'Bike' },
-                { day: 'Ср', activity: 'Legs' }, { day: 'Чт', activity: 'Pool' },
-                { day: 'Пт', activity: 'Pull' }, { day: 'Сб', activity: 'Arms' },
-                { day: 'Вс', activity: 'Отдых' }
-            ]);
-            if (!LS.get('records')) LS.set('records', []);
+        // ========== Данные ==========
+        const LS_KEY = 'my_workouts_v1';
+        let workouts = JSON.parse(localStorage.getItem(LS_KEY)) || [];
+
+        // Если тренировок ещё нет, добавим одну для примера (сегодняшнюю)
+        if (workouts.length === 0) {
+            const today = new Date().toISOString().slice(0, 10);
+            workouts.push(createNewWorkout('Верх (силовой)', today));
+            save();
         }
-        initData();
 
-        // ========== NAVIGATION WITH ANIMATION ==========
-        const mainContent = document.getElementById('mainContent');
-        const sections = document.querySelectorAll('.section');
-        const navButtons = document.querySelectorAll('.sidebar-nav button');
-        let currentSection = 'dashboard';
+        function createNewWorkout(type, date) {
+            const template = workoutTemplates[type] || [];
+            const exercises = template.map(ex => ({
+                name: ex.name,
+                plannedReps: ex.reps,
+                plannedWeights: [...ex.weights],
+                sets: ex.weights.map(w => ({ weight: w, reps: '', comment: '' }))
+            }));
+            return {
+                id: Date.now(),
+                type,
+                date,
+                exercises,
+                comment: ''
+            };
+        }
 
-        function switchSection(sectionId) {
-            if (currentSection === sectionId) return;
-            const oldSection = document.getElementById('section-' + currentSection);
-            const newSection = document.getElementById('section-' + sectionId);
-            if (!oldSection || !newSection) return;
+        function save() {
+            localStorage.setItem(LS_KEY, JSON.stringify(workouts));
+        }
 
-            // Exit animation
-            oldSection.classList.add('exit-left');
-            oldSection.classList.remove('active');
+        // ========== Рендеринг ==========
+        const workoutList = document.getElementById('workoutList');
+
+        function render() {
+            const sorted = [...workouts].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+            workoutList.innerHTML = sorted.map(w => {
+                const isOpen = w.id === currentOpenId;
+                return `
+                <div class="workout-card fade-slide ${isOpen ? 'open' : ''}" data-id="${w.id}">
+                    <div class="workout-header" onclick="toggleWorkout(${w.id})">
+                        <span class="workout-type">${w.type}</span>
+                        <span class="workout-date">${formatDate(w.date)}</span>
+                    </div>
+                    <div class="workout-body">
+                        ${w.exercises.map((ex, exIdx) => `
+                            <div class="exercise">
+                                <div class="exercise-name">
+                                    <span>${ex.name}</span>
+                                    <span class="planned">План: ${ex.plannedWeights.join(' / ')} кг × ${ex.plannedReps}</span>
+                                </div>
+                                ${ex.sets.map((set, setIdx) => `
+                                    <div class="set-row">
+                                        <span style="min-width:20px;color:var(--text2);">${setIdx+1}.</span>
+                                        <input class="weight-input" type="text" placeholder="${set.weight}" value="${set.weight}" onchange="updateSet(${w.id}, ${exIdx}, ${setIdx}, 'weight', this.value)">
+                                        <span style="color:var(--text2);">×</span>
+                                        <input type="text" placeholder="Повт." value="${set.reps}" onchange="updateSet(${w.id}, ${exIdx}, ${setIdx}, 'reps', this.value)">
+                                        <input class="comment-input" type="text" placeholder="Комментарий" value="${set.comment}" onchange="updateSet(${w.id}, ${exIdx}, ${setIdx}, 'comment', this.value)">
+                                    </div>
+                                `).join('')}
+                                <button class="add-set-btn" onclick="addSet(${w.id}, ${exIdx})">+ Подход</button>
+                            </div>
+                        `).join('')}
+                        <div class="workout-comment">
+                            <textarea placeholder="Общий комментарий к тренировке..." onchange="updateWorkoutComment(${w.id}, this.value)">${w.comment || ''}</textarea>
+                        </div>
+                        <button class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="deleteWorkout(${w.id})">🗑 Удалить</button>
+                        <span class="save-indicator" id="save-${w.id}">✓ Сохранено</span>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            // Если нет тренировок
+            if (sorted.length === 0) {
+                workoutList.innerHTML = '<p style="text-align:center;color:var(--text2);">Пока нет тренировок. Добавь новую!</p>';
+            }
+        }
+
+        let currentOpenId = null;
+
+        window.toggleWorkout = function(id) {
+            if (currentOpenId === id) {
+                currentOpenId = null;
+            } else {
+                currentOpenId = id;
+            }
+            render();
+        };
+
+        function formatDate(dateStr) {
+            const [y, m, d] = dateStr.split('-');
+            return `${d}.${m}.${y}`;
+        }
+
+        // ========== Обновление данных ==========
+        window.updateSet = function(workoutId, exIdx, setIdx, field, value) {
+            const workout = workouts.find(w => w.id === workoutId);
+            if (!workout) return;
+            workout.exercises[exIdx].sets[setIdx][field] = value;
+            save();
+            showSavedIndicator(workoutId);
+        };
+
+        window.addSet = function(workoutId, exIdx) {
+            const workout = workouts.find(w => w.id === workoutId);
+            if (!workout) return;
+            workout.exercises[exIdx].sets.push({ weight: '', reps: '', comment: '' });
+            save();
+            render();
+            currentOpenId = workoutId;
+            render(); // перерендерить с открытым
+        };
+
+        window.updateWorkoutComment = function(workoutId, value) {
+            const workout = workouts.find(w => w.id === workoutId);
+            if (!workout) return;
+            workout.comment = value;
+            save();
+            showSavedIndicator(workoutId);
+        };
+
+        window.deleteWorkout = function(id) {
+            if (confirm('Удалить эту тренировку?')) {
+                workouts = workouts.filter(w => w.id !== id);
+                if (currentOpenId === id) currentOpenId = null;
+                save();
+                render();
+            }
+        };
+
+        function showSavedIndicator(id) {
+            const el = document.getElementById('save-' + id);
+            if (el) {
+                el.classList.add('show');
+                setTimeout(() => el.classList.remove('show'), 1500);
+            }
+        }
+
+        // ========== Добавление новой тренировки ==========
+        document.getElementById('addWorkoutBtn').addEventListener('click', () => {
+            const type = prompt('Тип тренировки:\n1 - Верх (силовой)\n2 - Низ\n3 - Объемный верх', '1');
+            let selectedType;
+            if (type === '1') selectedType = 'Верх (силовой)';
+            else if (type === '2') selectedType = 'Низ';
+            else if (type === '3') selectedType = 'Объемный верх';
+            else return;
+
+            const date = prompt('Дата (ГГГГ-ММ-ДД)', new Date().toISOString().slice(0, 10));
+            if (!date) return;
+
+            workouts.push(createNewWorkout(selectedType, date));
+            save();
+            currentOpenId = workouts[workouts.length - 1].id;
+            render();
+            // прокрутка к новой карточке
             setTimeout(() => {
-                oldSection.classList.remove('exit-left');
-            }, 400);
-
-            // Enter animation
-            newSection.classList.add('active');
-            // Trigger render if needed
-            renderSection(sectionId);
-
-            // Update buttons
-            navButtons.forEach(b => b.classList.remove('active'));
-            document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
-            currentSection = sectionId;
-        }
-
-        navButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                switchSection(btn.dataset.section);
-            });
+                const card = document.querySelector(`[data-id="${currentOpenId}"]`);
+                if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         });
 
-        function renderSection(sectionId) {
-            switch (sectionId) {
-                case 'dashboard':
-                    renderDashboard();
-                    break;
-                case 'training':
-                    renderTrainingPage();
-                    break;
-                case 'progress':
-                    renderProgressPage();
-                    break;
-                case 'records':
-                    renderRecordsPage();
-                    break;
-                case 'plan':
-                    renderPlanPage();
-                    break;
-            }
-        }
-
-        // ========== ONBOARDING (first launch) ==========
-        function showOnboarding() {
-            if (LS.get('onboardingComplete')) return false;
-            const steps = [{
-                title: 'Давай знакомиться!',
-                html: `
-                    <label>Как тебя зовут?</label>
-                    <input id="onbName" placeholder="Имя" class="slide-up">
-                    <label style="margin-top:12px;">Пол</label>
-                    <div style="display:flex;align-items:center;gap:12px;" class="slide-up">
-                        <span>М</span>
-                        <label class="toggle-switch"><input type="checkbox" id="onbGender"><span class="slider"></span></label>
-                        <span>Ж</span>
-                    </div>
-                    <button class="btn btn-accent" style="margin-top:16px;width:100%;" id="nextBtn">Далее</button>
-                `,
-                action: () => {
-                    document.getElementById('nextBtn').onclick = () => {
-                        const profile = LS.get('profile');
-                        profile.name = document.getElementById('onbName').value || 'Атлет';
-                        profile.gender = document.getElementById('onbGender').checked ? 'Ж' : 'М';
-                        LS.set('profile', profile);
-                        nextOnboard(1);
-                    };
-                }
-            }, {
-                title: 'Для чего ты здесь?',
-                html: `
-                    <div id="goalOptions" style="display:flex;flex-direction:column;gap:8px;"></div>
-                    <button class="btn btn-accent" style="margin-top:16px;width:100%;" id="nextBtn">Далее</button>
-                `,
-                action: () => {
-                    const goals = ['Набрать мышечную массу', 'Сбросить вес и подсушиться', 'Стать сильнее',
-                        'Улучшить выносливость', 'Просто быть в форме', 'Реабилитация после травмы'
-                    ];
-                    const container = document.getElementById('goalOptions');
-                    goals.forEach(g => {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn btn-outline slide-up';
-                        btn.textContent = g;
-                        btn.style.justifyContent = 'flex-start';
-                        btn.onclick = () => {
-                            document.querySelectorAll('#goalOptions .btn').forEach(b => b
-                                .classList.remove('btn-accent'));
-                            btn.classList.add('btn-accent');
-                            container.dataset.goal = g;
-                        };
-                        container.appendChild(btn);
-                    });
-                    document.getElementById('nextBtn').onclick = () => {
-                        const profile = LS.get('profile');
-                        profile.goal = container.dataset.goal || goals[0];
-                        LS.set('profile', profile);
-                        nextOnboard(2);
-                    };
-                }
-            }, {
-                title: 'Твои параметры',
-                html: `
-                    <label>Рост (см)</label><input id="onbHeight" type="number" placeholder="180" class="slide-up">
-                    <label>Текущий вес (кг)</label><input id="onbWeight" type="number" step="0.1" placeholder="100" class="slide-up">
-                    <label>Уровень активности</label>
-                    <select id="onbActivity" class="slide-up">
-                        <option>Нет активности</option><option>1 тренировка в неделю</option>
-                        <option>3 тренировки в неделю</option><option>Занимаюсь каждый день</option>
-                    </select>
-                    <label>Желаемый вес (кг)</label><input id="onbTargetWeight" type="number" step="0.1" placeholder="92" class="slide-up">
-                    <button class="btn btn-accent" style="margin-top:16px;width:100%;" id="finishBtn">Начать тренировки!</button>
-                `,
-                action: () => {
-                    document.getElementById('finishBtn').onclick = () => {
-                        const profile = LS.get('profile');
-                        profile.height = document.getElementById('onbHeight').value;
-                        profile.weight = document.getElementById('onbWeight').value;
-                        profile.activity = document.getElementById('onbActivity').value;
-                        profile.targetWeight = document.getElementById('onbTargetWeight').value;
-                        LS.set('profile', profile);
-                        LS.set('onboardingComplete', true);
-                        document.getElementById('onboardModal').remove();
-                        showDailyCheckin();
-                        renderDashboard();
-                    };
-                }
-            }];
-
-            let currentStep = 0;
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.id = 'onboardModal';
-            modal.innerHTML = `<div class="modal" style="max-width:360px;"><h2>${steps[0].title}</h2>${steps[0].html}</div>`;
-            document.body.appendChild(modal);
-            if (steps[0].action) steps[0].action();
-
-            window.nextOnboard = function(next) {
-                currentStep = next;
-                const step = steps[currentStep];
-                modal.querySelector('.modal').innerHTML =
-                    `<h2>${step.title}</h2>${step.html}`;
-                if (step.action) step.action();
-                // re-animate elements
-                setTimeout(() => {
-                    document.querySelectorAll('.slide-up').forEach(el => el.classList.add(
-                        'slide-up'));
-                }, 10);
-            };
-            return true;
-        }
-
-        // ========== DAILY CHECKIN (weight + mood) ==========
-        function showDailyCheckin() {
-            const today = new Date().toISOString().slice(0, 10);
-            const profile = LS.get('profile');
-            const logs = profile.dailyLog || [];
-            if (logs.some(l => l.date === today)) return; // already checked in
-            const moods = [
-                { emoji: '😤', label: 'Заряжен' },
-                { emoji: '🙂', label: 'Нормально' },
-                { emoji: '😐', label: 'Так себе' },
-                { emoji: '😞', label: 'Уставший' },
-                { emoji: '🤕', label: 'Разбитый' }
-            ];
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.id = 'dailyModal';
-            modal.innerHTML = `
-                <div class="modal bounce-in" style="max-width:340px;">
-                    <h3>📋 Ежедневный чек-ин</h3>
-                    <label>Текущий вес (кг)</label>
-                    <input type="number" id="dailyWeight" step="0.1" value="${profile.weight || ''}" class="slide-up">
-                    <label style="margin-top:12px;">Настроение</label>
-                    <div style="display:flex;gap:8px;justify-content:center;" id="moodSelector">
-                        ${moods.map((m,i) => `<div class="mood-btn slide-up" data-mood="${i}" title="${m.label}">${m.emoji}</div>`).join('')}
-                    </div>
-                    <button class="btn btn-accent" style="margin-top:16px;width:100%;" id="saveDailyBtn">Сохранить</button>
-                </div>`;
-            document.body.appendChild(modal);
-
-            let selectedMood = null;
-            document.querySelectorAll('.mood-btn').forEach(b => {
-                b.addEventListener('click', () => {
-                    document.querySelectorAll('.mood-btn').forEach(x => x.classList.remove(
-                        'selected'));
-                    b.classList.add('selected');
-                    selectedMood = b.dataset.mood;
-                });
-            });
-            document.getElementById('saveDailyBtn').onclick = () => {
-                const weight = document.getElementById('dailyWeight').value;
-                if (!weight || selectedMood === null) return;
-                profile.weight = weight;
-                profile.dailyLog.push({ date: today, weight, mood: selectedMood });
-                LS.set('profile', profile);
-                document.getElementById('dailyModal').remove();
-                renderDashboard();
-            };
-        }
-
-        // ========== DASHBOARD ==========
-        function renderDashboard() {
-            const p = LS.get('profile');
-            const trainings = LS.get('training');
-            const logs = p.dailyLog || [];
-            const lastWeight = logs.length ? logs[logs.length - 1].weight : p.weight;
-            const weekLogs = logs.filter(l => new Date(l.date) >= new Date(Date.now() - 7 * 86400000));
-            const avgWeight = weekLogs.length ? (weekLogs.reduce((a, l) => a + parseFloat(l.weight), 0) / weekLogs.length)
-                .toFixed(1) : lastWeight;
-            const trainCount = trainings.filter(t => new Date(t.date) >= new Date(Date.now() - 7 * 86400000)).length;
-            const lastMoodEmoji = logs.length ? ['😤', '🙂', '😐', '😞', '🤕'][logs[logs.length - 1].mood] : '🙂';
-
-            document.getElementById('section-dashboard').innerHTML = `
-                <h2>📊 Дашборд</h2>
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:12px; margin-bottom:16px;">
-                    <div class="stat-box"><div class="val accent-val">${lastWeight || '—'}</div><div class="lbl">Вес (кг)</div></div>
-                    <div class="stat-box"><div class="val">${avgWeight || '—'}</div><div class="lbl">Средний за нед.</div></div>
-                    <div class="stat-box"><div class="val">${trainCount}</div><div class="lbl">Тренировки за нед.</div></div>
-                </div>
-                <div class="card"><h3>⚡ Индекс атлета</h3><div style="font-size:2.5rem;font-weight:900;text-align:center;">${Math.min(100, trainCount*20 + 50)}</div><small style="color:var(--text2);display:block;text-align:center;">из 100</small></div>
-                <div class="card"><h3>📈 Динамика веса</h3><div class="chart-wrap"><canvas id="weightChart"></canvas></div></div>
-                <div class="card"><h3>😌 Самочувствие</h3><div style="font-size:4rem;text-align:center;">${lastMoodEmoji}</div></div>
-            `;
-
-            const ctx = document.getElementById('weightChart')?.getContext('2d');
-            if (ctx) {
-                const labels = logs.map(l => l.date);
-                const data = logs.map(l => l.weight);
-                new Chart(ctx, {
-                    type: 'line',
-                    data: { labels, datasets: [{ label: 'Вес', data, borderColor: '#ff9600', backgroundColor: 'rgba(255,150,0,0.1)', fill: true }] },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            }
-        }
-
-        // ========== TRAINING ==========
-        let trainingActive = false,
-            trainingTimer = null,
-            startTime = null,
-            elapsedSeconds = 0,
-            exercises = [],
-            currentTrainingType = '';
-
-        function renderTrainingPage() {
-            if (trainingActive) {
-                document.getElementById('section-training').innerHTML = `
-                    <h2>🏋️ ${currentTrainingType}</h2>
-                    <div class="timer-display">
-                        <span id="timerDisplay">00:00</span><span class="timer-dot"></span>
-                    </div>
-                    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
-                        <button class="btn btn-outline" id="pauseBtn">⏸️ Пауза</button>
-                        <button class="btn btn-accent" id="stopBtn">⏹️ Завершить</button>
-                    </div>
-                    <div id="liveExercises"></div>
-                    <button class="btn btn-outline btn-sm" onclick="addLiveExercise()" style="margin-top:8px;">+ Упражнение</button>
-                `;
-                updateTimerDisplay();
-                document.getElementById('pauseBtn').onclick = togglePause;
-                document.getElementById('stopBtn').onclick = finishTraining;
-                renderLiveExercises();
-            } else {
-                document.getElementById('section-training').innerHTML = `
-                    <h2>🏋️ Тренировки</h2>
-                    <div class="card">
-                        <h3>Новая тренировка</h3>
-                        <select id="trainType"><option>Push</option><option>Pull</option><option>Legs</option><option>Arms</option><option>Другое</option></select>
-                        <button class="btn btn-accent" style="margin-top:12px;width:100%;" onclick="startTraining()">▶️ Начать</button>
-                    </div>
-                    <div class="card"><h3>📋 История</h3><div id="trainHistory"></div></div>
-                `;
-                renderTrainingHistory();
-            }
-        }
-
-        function startTraining() {
-            currentTrainingType = document.getElementById('trainType').value;
-            exercises = [{ name: '', sets: [{ weight: '', reps: '' }] }];
-            elapsedSeconds = 0;
-            trainingActive = true;
-            startTime = Date.now();
-            trainingTimer = setInterval(() => {
-                elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-                updateTimerDisplay();
-            }, 200);
-            renderTrainingPage();
-        }
-
-        function togglePause() {
-            if (trainingActive) {
-                clearInterval(trainingTimer);
-                trainingActive = false;
-                document.getElementById('pauseBtn').textContent = '▶️ Продолжить';
-            } else {
-                trainingActive = true;
-                startTime = Date.now() - elapsedSeconds * 1000;
-                trainingTimer = setInterval(() => {
-                    elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-                    updateTimerDisplay();
-                }, 200);
-                document.getElementById('pauseBtn').textContent = '⏸️ Пауза';
-            }
-        }
-
-        function updateTimerDisplay() {
-            const el = document.getElementById('timerDisplay');
-            if (!el) return;
-            const mins = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
-            const secs = (elapsedSeconds % 60).toString().padStart(2, '0');
-            el.textContent = `${mins}:${secs}`;
-        }
-
-        function addLiveExercise() {
-            exercises.push({ name: '', sets: [{ weight: '', reps: '' }] });
-            renderLiveExercises();
-        }
-
-        function renderLiveExercises() {
-            const div = document.getElementById('liveExercises');
-            div.innerHTML = exercises.map((ex, i) => `
-                <div class="card">
-                    <input placeholder="Упражнение" value="${ex.name}" onchange="exercises[${i}].name=this.value">
-                    ${ex.sets.map((s, si) => `
-                        <div style="display:flex;gap:6px;margin-top:6px;">
-                            <input placeholder="Вес" value="${s.weight}" onchange="exercises[${i}].sets[${si}].weight=this.value">
-                            <input placeholder="Повторы" value="${s.reps}" onchange="exercises[${i}].sets[${si}].reps=this.value">
-                        </div>`).join('')}
-                    <button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="exercises[${i}].sets.push({weight:'',reps:''});renderLiveExercises();">+ Подход</button>
-                </div>
-            `).join('');
-        }
-
-        function finishTraining() {
-            clearInterval(trainingTimer);
-            trainingActive = false;
-            const duration = elapsedSeconds;
-            const training = LS.get('training');
-            training.push({
-                date: new Date().toISOString().slice(0, 10),
-                type: currentTrainingType,
-                duration,
-                exercises: JSON.parse(JSON.stringify(exercises.filter(e => e.name.trim() !== '')))
-            });
-            LS.set('training', training);
-            renderTrainingPage();
-            showPraiseAnimation();
-        }
-
-        function showPraiseAnimation() {
-            const phrases = ['🔥 Круто!', '💪 Ну ты даёшь!', '🚀 Мощно!', '🏆 Ты машина!', '👊 Так держать!'];
-            const emojis = ['🦾', '🏋️', '💯', '⚡', '🥇'];
-            const phrase = phrases[Math.floor(Math.random() * phrases.length)];
-            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-            const container = document.getElementById('praiseContainer');
-            container.style.display = 'flex';
-            container.innerHTML = `
-                <div class="praise-overlay" onclick="this.parentElement.style.display='none'">
-                    <div class="praise-card">
-                        <div class="praise-emoji">${emoji}</div>
-                        <div class="praise-text">${phrase}</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderTrainingHistory() {
-            const trainings = LS.get('training').slice(-10).reverse();
-            const div = document.getElementById('trainHistory');
-            div.innerHTML = trainings.map(t => `
-                <div class="card">
-                    <strong>${t.date}</strong> ${t.type} — ${Math.floor(t.duration/60)}:${(t.duration%60).toString().padStart(2,'0')}
-                    <div style="color:var(--text2);">${t.exercises.map(e => e.name + ' (' + e.sets.length + ' подх.)').join(', ')}</div>
-                </div>
-            `).join('') || '<p style="color:var(--text2);">Нет завершённых тренировок</p>';
-        }
-
-        // ========== PROGRESS ==========
-        function renderProgressPage() {
-            document.getElementById('section-progress').innerHTML = `
-                <h2>📈 График прогрессии</h2>
-                <select id="progExercise" onchange="drawProgress()" style="margin-bottom:12px;"></select>
-                <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
-            `;
-            const exSet = new Set();
-            LS.get('training').forEach(t => t.exercises.forEach(e => { if (e.name) exSet.add(e.name); }));
-            const select = document.getElementById('progExercise');
-            select.innerHTML = [...exSet].map(e => `<option>${e}</option>`).join('');
-            if (exSet.size > 0) drawProgress();
-        }
-
-        function drawProgress() {
-            const ex = document.getElementById('progExercise')?.value;
-            if (!ex) return;
-            const data = [];
-            LS.get('training').forEach(t => {
-                t.exercises.forEach(e => {
-                    if (e.name === ex) {
-                        const maxW = Math.max(...e.sets.map(s => parseFloat(s.weight) || 0));
-                        data.push({ date: t.date, weight: maxW });
-                    }
-                });
-            });
-            data.sort((a, b) => a.date.localeCompare(b.date));
-            const ctx = document.getElementById('progressChart')?.getContext('2d');
-            if (ctx) {
-                if (window.progressChartInstance) window.progressChartInstance.destroy();
-                window.progressChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(d => d.date),
-                        datasets: [{ label: 'Вес (кг)', data: data.map(d => d.weight), backgroundColor: '#ff9600' }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            }
-        }
-
-        // ========== RECORDS ==========
-        function renderRecordsPage() {
-            const records = LS.get('records');
-            document.getElementById('section-records').innerHTML = `
-                <h2>🏆 Личные рекорды</h2>
-                ${records.map((r, i) => `
-                    <div class="card" style="display:flex;align-items:center;gap:12px;">
-                        <span style="font-size:2rem;">🥇</span>
-                        <div>
-                            <strong>${r.exercise}</strong> — ${r.weightReps}
-                            <div style="color:var(--text2);">Предполагаемый максимум: ${r.estMax} кг</div>
-                        </div>
-                        <button class="btn btn-sm btn-danger" style="margin-left:auto;" onclick="deleteRecord(${i})">✕</button>
-                    </div>
-                `).join('')}
-                <div class="card">
-                    <input id="recEx" placeholder="Упражнение">
-                    <input id="recWR" placeholder="Вес×Повторы" style="margin-top:6px;">
-                    <button class="btn btn-accent btn-sm" style="margin-top:6px;" onclick="addRecord()">+ Добавить рекорд</button>
-                </div>
-            `;
-        }
-
-        function addRecord() {
-            const ex = document.getElementById('recEx').value.trim();
-            const wr = document.getElementById('recWR').value.trim();
-            if (!ex || !wr) return;
-            const parts = wr.split('×');
-            const weight = parseFloat(parts[0]);
-            const reps = parseInt(parts[1]);
-            if (isNaN(weight) || isNaN(reps)) return;
-            const estMax = Math.round(weight * (1 + reps / 30));
-            const records = LS.get('records');
-            records.push({ exercise: ex, weightReps: wr, estMax });
-            LS.set('records', records);
-            renderRecordsPage();
-        }
-
-        function deleteRecord(index) {
-            const records = LS.get('records');
-            records.splice(index, 1);
-            LS.set('records', records);
-            renderRecordsPage();
-        }
-
-        // ========== PLAN ==========
-        function renderPlanPage() {
-            const plan = LS.get('plan');
-            document.getElementById('section-plan').innerHTML = `
-                <h2>📅 План на неделю</h2>
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                    ${plan.map((p, i) => `
-                        <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
-                            <div><strong>${p.day}</strong> — ${p.activity}</div>
-                            <button class="btn btn-sm btn-outline" onclick="startFromPlan('${p.activity}')">▶️</button>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="card" style="margin-top:16px;">
-                    <input id="planDay" placeholder="День (Пн,Вт...)">
-                    <input id="planAct" placeholder="Активность" style="margin-top:6px;">
-                    <button class="btn btn-accent btn-sm" style="margin-top:6px;" onclick="addPlanItem()">+ Добавить</button>
-                </div>
-            `;
-        }
-
-        function startFromPlan(activity) {
-            currentTrainingType = activity;
-            switchSection('training');
-            setTimeout(() => {
-                startTraining();
-            }, 300);
-        }
-
-        function addPlanItem() {
-            const day = document.getElementById('planDay').value.trim();
-            const act = document.getElementById('planAct').value.trim();
-            if (!day || !act) return;
-            const plan = LS.get('plan');
-            plan.push({ day, activity: act });
-            LS.set('plan', plan);
-            renderPlanPage();
-        }
-
-        // ========== INIT ==========
-        if (!showOnboarding()) {
-            showDailyCheckin();
-        }
-        renderDashboard();
+        // Initial render
+        render();
     </script>
 </body>
 </html>
